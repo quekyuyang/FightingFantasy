@@ -10,72 +10,205 @@ namespace FightingFantasy
         public string story;
         public int next_chapter;
         public object[][] choices;
-        public Enemy[] enemies;
+        public List<Enemy> enemies;
     }
 
     class Chapter
     {
-        public string story;
+        public string Story { get; set; }
+        public string Message { get; set; }
+        public bool IsActive { get; set; }
+        public int NextChapter { get; set; }
 
-        public virtual int Play(){ return -1; }
+        public virtual void Continue(string input){}
+
+        public virtual string[] GetChoices()
+        {
+            return new string[0];
+        }
     }
 
     class StoryOnlyChapter : Chapter
     {
-        public int next_chapter;
-
         public StoryOnlyChapter(string story, int next_chapter)
         {
-            this.story = story;
-            this.next_chapter = next_chapter;
+            Story = story;
+            Message = "";
+            NextChapter = next_chapter;
+            IsActive = true;
         }
 
-        public override int Play()
+        public override void Continue(string input)
         {
-            Console.WriteLine(story);
-            Console.ReadLine();
-            return next_chapter;
+            IsActive = false;
         }
     }
 
     class ChoiceChapter : Chapter
     {
-        public object[][] choices { get; set; }
+        public object[][] Choices { get; set; }
         
         public ChoiceChapter(string story, object[][] choices)
         {
-            this.story = story;
-            this.choices = choices;
+            Story = story;
+            Message = "";
+            Choices = choices;
+            IsActive = true;
         }
 
-        public override int Play()
+        public override void Continue(string input)
         {
-            Console.WriteLine(story);
-            Console.WriteLine();
-            for (int i = 0; i < choices.Length; i++)
-                Console.WriteLine("{0}. {1}", i + 1, (string)choices[i][0]);
+            int player_choice;
+            if (Int32.TryParse(input, out player_choice) && player_choice <= Choices.Length && player_choice >= 1)
+            {
+                long temp = (long)Choices[player_choice - 1][1];
+                NextChapter = (int)temp;
+                IsActive = false;
+            }
+            else
+            {
+                Message = "Invalid choice. Please enter a number corresponding to one of the choices above.";
+            }
+        }
 
-            int user_choice;
-            while (!Int32.TryParse(Console.ReadLine(), out user_choice) && user_choice > choices.Length && user_choice < 1) 
-                Console.WriteLine("Invalid input, please enter again.");
-
-            long chapter_n = (long)choices[user_choice - 1][1];
-            return (int)chapter_n;
+        public override string[] GetChoices()
+        {
+            int n_choices = Choices.Length;
+            string[] choices = new string[n_choices];
+            for (int i = 0; i < n_choices; i++)
+                choices[i] = (string)Choices[i][0];
+            return choices;
         }
     }
 
     class BattleChapter : Chapter
     {
-        public Enemy[] enemies;
+        public List<Enemy> enemies;
+        public Enemy current_enemy;
+        public string State { get; set; }
         public Protagonist protag;
-        public int next_chapter;
+        public object[][] choices { get; set; }
+        private bool paused;
 
-        public BattleChapter(string story, Protagonist protag, Enemy[] enemies, int next_chapter)
+        public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter)
         {
-            this.story = story;
+            Story = story;
+            Message = "";
+            this.current_enemy = enemies[0];
             this.enemies = enemies;
             this.protag = protag;
-            this.next_chapter = next_chapter;
+            NextChapter = next_chapter;
+            paused = true;
+            IsActive = true;
+        }
+
+        public override string[] GetChoices()
+        {
+            if (!paused)
+                return new string[] { "Yes", "No" };
+            else
+                return new string[0];
+        }
+
+        public override void Continue(string input)
+        {
+            Message = "";
+            if (!paused)
+            {
+                int player_choice;
+                if (!Int32.TryParse(input, out player_choice) || player_choice > 2 || player_choice < 1)
+                {
+                    Message = "Invalid choice. Please enter a number corresponding to one of the choices above.";
+                    return;
+                }
+
+                if (player_choice == 1)
+                {
+                    bool is_lucky = protag.TestLuck();
+                    if (State == "wounding")
+                    {
+                        if (is_lucky)
+                        {
+                            current_enemy.stamina -= 2;
+                            Message = "You dealt a critical blow!"; // These messages are never shown because overwritten by RunNextRound
+                        }
+                        else
+                        {
+                            current_enemy.stamina += 1;
+                            Message = "The wound was a mere graze..";
+                        }
+                            
+                    }
+                    else if (State == "wounded")
+                    {
+                        if (is_lucky)
+                        {
+                            protag.stamina += 1;
+                            Message = "You managed to avoid full damage!";
+                        }
+                        else
+                        {
+                            protag.stamina -= 1;
+                            Message = "You suffered a critical blow!";
+                        }
+                            
+                    }
+                }
+
+                if (EnemyDead())
+                {
+                    Message = $"You defeated {current_enemy.name}!";
+                    ReadyNextEnemy();
+                    paused = true;
+                }
+            }
+            else
+                paused = false;
+
+            if (!paused)
+                RunNextRound();
+        }
+
+        private void RunNextRound()
+        {
+            if (protag.AttackStrength() > current_enemy.AttackStrength())
+            {
+                current_enemy.stamina -= 2;
+                State = "wounding";
+                Message = "You have wounded the enemy! Test your luck?";
+            }
+            else
+            {
+                protag.stamina -= 2;
+                State = "wounded";
+                Message = "You have been wounded! Test your luck?";
+            }
+
+            if (EnemyDead())
+            {
+                Message = $"You defeated {current_enemy.name}!";
+                ReadyNextEnemy();
+                paused = true;
+            }
+        }
+
+        private bool EnemyDead()
+        {
+            return current_enemy.stamina <= 0;
+        }
+
+        private void ReadyNextEnemy()
+        {
+            enemies.RemoveAt(0);
+            if (enemies.Count == 0)
+                IsActive = false;
+            else
+                current_enemy = enemies[0];
+        }
+
+        public (string,int,int) GetEnemyStats()
+        {
+            return (current_enemy.name,current_enemy.stamina, current_enemy.skill);
         }
     }
 

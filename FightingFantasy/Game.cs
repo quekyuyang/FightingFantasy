@@ -19,23 +19,11 @@ namespace FightingFantasy
             GoToChapter(chapter_n);
         }
 
-        static public void Continue()
+        static public void Continue(string input)
         {
-            if (current_chapter is StoryOnlyChapter story_chapter)
-                GoToChapter(story_chapter.next_chapter);
-            else
-                Console.WriteLine("Attempt to continue in non story only chapter");
-        }
-
-        static public void Choose(int choice_n)
-        {
-            if (current_chapter is ChoiceChapter choice_chapter)
-            {
-                long chapter_n = (long)choice_chapter.choices[choice_n - 1][1];
-                GoToChapter((int)chapter_n);
-            }
-            else
-                Console.WriteLine("Attempt to choose in non choice chapter");
+            current_chapter.Continue(input);
+            if (!current_chapter.IsActive)
+                GoToChapter(current_chapter.NextChapter);
         }
 
         static private void GoToChapter(int chapter_n)
@@ -45,43 +33,32 @@ namespace FightingFantasy
             else if (chapters[chapter_n].type == "story_only")
                 current_chapter = new StoryOnlyChapter(chapters[chapter_n].story, chapters[chapter_n].next_chapter);
             else if (chapters[chapter_n].type == "prebattle_choices")
-            {
                 current_chapter = new BattleChapter(chapters[chapter_n].story, protag, chapters[chapter_n].enemies, chapters[chapter_n].next_chapter);
-                battle = new Battle(protag, chapters[chapter_n].enemies);
-            }
-                
         }
 
         static public Type GetChapterType() => current_chapter.GetType();
-        static public string GetStory() => current_chapter.story;
+        static public string GetStory() => current_chapter.Story;
         static public (int,int,int) GetProtagStats() => (protag.stamina,protag.skill,protag.luck);
+        static public (string,int,int) GetEnemyStats()
+        {
+            if (current_chapter is BattleChapter battle_chapter)
+                return battle_chapter.GetEnemyStats();
+            else
+                return ("", -1, -1);
+        }
         static public string[] GetChoices()
         {
-            if (current_chapter is StoryOnlyChapter story_chapter)
-            {
-                return new string[0];
-            }
-            else if (current_chapter is ChoiceChapter choice_chapter)
-            {
-                int n_choices = choice_chapter.choices.Length;
-                string[] choices = new string[n_choices];
-                for (int i = 0; i < n_choices; i++)
-                    choices[i] = (string)choice_chapter.choices[i][0];
-                return choices;
-            }
-            else
-                throw new InvalidOperationException("Attempt to get choices when current chapter has none");
+            return current_chapter.GetChoices();
         }
 
-        static public bool BattleOngoing()
+        static public string GetMessage()
         {
-            return (battle != null);
+            return current_chapter.Message;
         }
     }
 
     class Battle
     {
-        public bool BattleOngoing { get; set; }
         private Protagonist protag;
         private Enemy current_enemy;
         private Enemy[] enemies;
@@ -90,7 +67,6 @@ namespace FightingFantasy
 
         public Battle(Protagonist protag, Enemy[] enemies)
         {
-            this.BattleOngoing = true;
             this.protag = protag;
             this.enemies = enemies;
             this.current_enemy = enemies[0];
@@ -113,11 +89,6 @@ namespace FightingFantasy
         public string[] GetChoices()
         {
             return choices;
-        }
-
-        public void EndBattle()
-        {
-            BattleOngoing = false;
         }
     }
 }

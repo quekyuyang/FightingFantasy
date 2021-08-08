@@ -11,13 +11,14 @@ namespace FightingFantasy
             Console.Clear();
             DisplayCharacterStats();
 
-            if (!Game.BattleOngoing())
-            {
-                Console.WriteLine(Game.GetStory());
-                Console.WriteLine();
+            Console.WriteLine(Game.GetStory());
+            Console.WriteLine();
 
-                DisplayChoices();
-            }
+            DisplayEnemyStats();
+
+            DisplayChoices();
+            Console.WriteLine(Game.GetMessage());
+            PromptResponse();
         }
 
         static private void DisplayChoices()
@@ -39,6 +40,23 @@ namespace FightingFantasy
             Console.WriteLine("Skill: {0}", skill);
             Console.WriteLine("Luck: {0}", luck);
             Console.WriteLine();
+        }
+
+        static private void DisplayEnemyStats()
+        {
+            var (name, stamina, skill) = Game.GetEnemyStats();
+            if (name.Length > 0)
+            {
+                Console.WriteLine(name);
+                Console.WriteLine($"Stamina: {stamina}");
+                Console.WriteLine($"Skill: {skill}");
+                Console.WriteLine();
+            }
+        }
+
+        static private void PromptResponse()
+        {
+            Console.Write("->");
         }
     }
 }
