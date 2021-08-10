@@ -84,117 +84,49 @@ namespace FightingFantasy
     class BattleChapter : Chapter
     {
         public List<Enemy> enemies;
-        public Enemy current_enemy;
         public string State { get; set; }
         public Protagonist protag;
         public object[][] choices { get; set; }
         private bool paused;
+        private Battle battle;
 
         public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter)
         {
             Story = story;
             Message = "";
-            this.current_enemy = enemies[0];
             this.enemies = enemies;
             this.protag = protag;
             NextChapter = next_chapter;
             paused = true;
             IsActive = true;
+
+            battle = new Battle(protag, enemies[0]);
         }
 
         public override string[] GetChoices()
         {
-            if (!paused)
-                return new string[] { "Yes", "No" };
-            else
-                return new string[0];
+            return battle.GetChoices();
         }
 
         public override void Continue(string input)
         {
             Message = "";
-            if (!paused)
+
+            if (battle.BattleEnded)
             {
-                int player_choice;
-                if (!Int32.TryParse(input, out player_choice) || player_choice > 2 || player_choice < 1)
-                {
-                    Message = "Invalid choice. Please enter a number corresponding to one of the choices above.";
-                    return;
-                }
-
-                if (player_choice == 1)
-                {
-                    bool is_lucky = protag.TestLuck();
-                    if (State == "wounding")
-                    {
-                        if (is_lucky)
-                        {
-                            current_enemy.stamina -= 2;
-                            Message = "You dealt a critical blow!"; // These messages are never shown because overwritten by RunNextRound
-                        }
-                        else
-                        {
-                            current_enemy.stamina += 1;
-                            Message = "The wound was a mere graze..";
-                        }
-                            
-                    }
-                    else if (State == "wounded")
-                    {
-                        if (is_lucky)
-                        {
-                            protag.stamina += 1;
-                            Message = "You managed to avoid full damage!";
-                        }
-                        else
-                        {
-                            protag.stamina -= 1;
-                            Message = "You suffered a critical blow!";
-                        }
-                            
-                    }
-                }
-
-                if (EnemyDead())
-                {
-                    Message = $"You defeated {current_enemy.name}!";
-                    ReadyNextEnemy();
-                    paused = true;
-                }
-            }
-            else
-                paused = false;
-
-            if (!paused)
-                RunNextRound();
-        }
-
-        private void RunNextRound()
-        {
-            if (protag.AttackStrength() > current_enemy.AttackStrength())
-            {
-                current_enemy.stamina -= 2;
-                State = "wounding";
-                Message = "You have wounded the enemy! Test your luck?";
-            }
-            else
-            {
-                protag.stamina -= 2;
-                State = "wounded";
-                Message = "You have been wounded! Test your luck?";
-            }
-
-            if (EnemyDead())
-            {
-                Message = $"You defeated {current_enemy.name}!";
                 ReadyNextEnemy();
-                paused = true;
+                return;
             }
-        }
+                
+            int player_choice;
+            if (!Int32.TryParse(input, out player_choice) || player_choice > 2 || player_choice < 1)
+            {
+                Message = "Invalid choice. Please enter a number corresponding to one of the choices above.";
+                return;
+            }
 
-        private bool EnemyDead()
-        {
-            return current_enemy.stamina <= 0;
+            battle.RunNextRound(player_choice);
+            Message = battle.Message;
         }
 
         private void ReadyNextEnemy()
@@ -203,12 +135,13 @@ namespace FightingFantasy
             if (enemies.Count == 0)
                 IsActive = false;
             else
-                current_enemy = enemies[0];
+                battle = new Battle(protag,enemies[0]);
         }
 
         public (string,int,int) GetEnemyStats()
         {
-            return (current_enemy.name,current_enemy.stamina, current_enemy.skill);
+            Enemy enemy = enemies[0];
+            return (enemy.name,enemy.stamina, enemy.skill);
         }
     }
 

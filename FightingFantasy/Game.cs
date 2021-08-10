@@ -9,7 +9,6 @@ namespace FightingFantasy
         static private Dictionary<int, JsonChapter> chapters;
         static private Chapter current_chapter;
         static private Protagonist protag;
-        static private Battle battle;
 
         static public void Start(Dictionary<int, JsonChapter> chapters)
         {
@@ -60,35 +59,101 @@ namespace FightingFantasy
     class Battle
     {
         private Protagonist protag;
-        private Enemy current_enemy;
-        private Enemy[] enemies;
-        public string State { get; set; } // How to make getter only from outside but retain setter for internal use?
-        private string[] choices;
+        private Enemy enemy;
+        public string State { get; set; }
+        private bool ExpectInput { get; set; }
+        public string Message { get; set; }
+        public bool BattleEnded { get; set; }
 
-        public Battle(Protagonist protag, Enemy[] enemies)
+        public Battle(Protagonist protag, Enemy enemy)
         {
             this.protag = protag;
-            this.enemies = enemies;
-            this.current_enemy = enemies[0];
+            this.enemy = enemy;
+
+            State = "";
+            ExpectInput = false;
+            Message = "";
+            BattleEnded = false;
         }
 
-        public void Continue()
+        public void RunNextRound(int choice_n)
         {
-            if (protag.AttackStrength() > current_enemy.AttackStrength())
+            Message = "";
+            if (!ExpectInput)
             {
-                current_enemy.TakeDmg(protag.DealDmg());
-                State = "wounding";
+                if(protag.AttackStrength() > enemy.AttackStrength())
+                {
+                    enemy.stamina -= 2;
+                    State = "wounding";
+                    Message = "You have wounded the enemy! Test your luck?";
+                }
+                else
+                {
+                    protag.stamina -= 2;
+                    State = "wounded";
+                    Message = "You have been wounded! Test your luck?";
+                }
+
+                ExpectInput = true;
             }
             else
             {
-                protag.TakeDmg(current_enemy.DealDmg());
-                State = "wounded";
+                if (choice_n == 1)
+                    ApplyLuck(protag.TestLuck());
+                ExpectInput = false;
+            }
+
+            if (EnemyDead())
+            {
+                Message = $"You defeated {enemy.name}!";
+                ExpectInput = false;
+                BattleEnded = true;
+            }
+        }
+
+        private void ApplyLuck(bool is_lucky)
+        {
+            if (State == "wounding")
+            {
+                if (is_lucky)
+                {
+                    enemy.stamina -= 2;
+                    Message = "You dealt a critical blow!";
+                }
+                else
+                {
+                    enemy.stamina += 1;
+                    Message = "The enemy's wound was a mere graze..";
+                }
+
+            }
+            else if (State == "wounded")
+            {
+                if (is_lucky)
+                {
+                    protag.stamina += 1;
+                    Message = "You managed to avoid the full damage!";
+                }
+                else
+                {
+                    protag.stamina -= 1;
+                    Message = "You suffered a critical blow!";
+                }
+
             }
         }
 
         public string[] GetChoices()
         {
-            return choices;
+            if (ExpectInput)
+                return new string[] { "Yes", "No" };
+            else
+                return new string[0];
+        }
+
+        private bool EnemyDead()
+        {
+            return enemy.stamina <= 0;
         }
     }
 }
