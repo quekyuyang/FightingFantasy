@@ -11,6 +11,7 @@ namespace FightingFantasy
         public int next_chapter;
         public object[][] choices;
         public List<Enemy> enemies;
+        public object[][] stat_changes;
     }
 
     class Chapter

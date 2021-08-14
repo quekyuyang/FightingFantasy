@@ -33,6 +33,22 @@ namespace FightingFantasy
                 current_chapter = new StoryOnlyChapter(chapters[chapter_n].story, chapters[chapter_n].next_chapter);
             else if (chapters[chapter_n].type == "prebattle_choices")
                 current_chapter = new BattleChapter(chapters[chapter_n].story, protag, chapters[chapter_n].enemies, chapters[chapter_n].next_chapter);
+
+            if (chapters[chapter_n].stat_changes != null)
+                ApplyStatChanges(chapters[chapter_n].stat_changes);
+        }
+
+        static private void ApplyStatChanges(object[][] stat_changes)
+        {
+            foreach (object[] stat_change in stat_changes)
+            {
+                if ((string)stat_change[0] == "stamina")
+                    protag.stamina += (int)(long)stat_change[1];
+                else if ((string)stat_change[0] == "skill")
+                    protag.skill += (int)(long)stat_change[1];
+                else if ((string)stat_change[0] == "luck")
+                    protag.luck += (int)(long)stat_change[1];
+            }
         }
 
         static public Type GetChapterType() => current_chapter.GetType();
