@@ -27,15 +27,16 @@ namespace FightingFantasy
 
         static private void GoToChapter(int chapter_n)
         {
-            if (chapters[chapter_n].type == "choices")
-                current_chapter = new ChoiceChapter(chapters[chapter_n].story, chapters[chapter_n].choices);
-            else if (chapters[chapter_n].type == "story_only")
-                current_chapter = new StoryOnlyChapter(chapters[chapter_n].story, chapters[chapter_n].next_chapter);
-            else if (chapters[chapter_n].type == "prebattle_choices")
-                current_chapter = new BattleChapter(chapters[chapter_n].story, protag, chapters[chapter_n].enemies, chapters[chapter_n].next_chapter);
+            JsonChapter chapter_data = chapters[chapter_n];
+            if (chapter_data.type == "choices")
+                current_chapter = new ChoiceChapter(chapter_data.story, chapter_data.choices);
+            else if (chapter_data.type == "story_only")
+                current_chapter = new StoryOnlyChapter(chapter_data.story, chapter_data.next_chapter);
+            else if (chapter_data.type == "prebattle_choices")
+                current_chapter = new BattleChapter(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter);
 
-            if (chapters[chapter_n].stat_changes != null)
-                ApplyStatChanges(chapters[chapter_n].stat_changes);
+            if (chapter_data.stat_changes != null)
+                ApplyStatChanges(chapter_data.stat_changes);
         }
 
         static private void ApplyStatChanges(object[][] stat_changes)
