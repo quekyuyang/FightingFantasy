@@ -29,27 +29,11 @@ namespace FightingFantasy
         {
             JsonChapter chapter_data = chapters[chapter_n];
             if (chapter_data.type == "choices")
-                current_chapter = new ChoiceChapter(chapter_data.story, chapter_data.choices);
+                current_chapter = new ChoiceChapter(chapter_data.story, protag, chapter_data.choices, chapter_data.stat_changes);
             else if (chapter_data.type == "story_only")
-                current_chapter = new StoryOnlyChapter(chapter_data.story, chapter_data.next_chapter);
+                current_chapter = new StoryOnlyChapter(chapter_data.story, protag, chapter_data.next_chapter, chapter_data.stat_changes);
             else if (chapter_data.type == "prebattle_choices")
-                current_chapter = new BattleChapter(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter);
-
-            if (chapter_data.stat_changes != null)
-                ApplyStatChanges(chapter_data.stat_changes);
-        }
-
-        static private void ApplyStatChanges(object[][] stat_changes)
-        {
-            foreach (object[] stat_change in stat_changes)
-            {
-                if ((string)stat_change[0] == "stamina")
-                    protag.stamina += (int)(long)stat_change[1];
-                else if ((string)stat_change[0] == "skill")
-                    protag.skill += (int)(long)stat_change[1];
-                else if ((string)stat_change[0] == "luck")
-                    protag.luck += (int)(long)stat_change[1];
-            }
+                current_chapter = new BattleChapter(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter, chapter_data.stat_changes);
         }
 
         static public Type GetChapterType() => current_chapter.GetType();

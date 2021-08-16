@@ -20,12 +20,27 @@ namespace FightingFantasy
         public string Message { get; set; }
         public bool IsActive { get; set; }
         public int NextChapter { get; set; }
+        public Protagonist protag;
 
-        public Chapter(string story)
+        public Chapter(string story, Protagonist protag, object[][] stat_changes)
         {
             Story = story;
             Message = "";
             IsActive = true;
+            this.protag = protag;
+
+            if (stat_changes != null)
+            {
+                foreach (object[] stat_change in stat_changes)
+                {
+                    if ((string)stat_change[0] == "stamina")
+                        protag.stamina += (int)(long)stat_change[1];
+                    else if ((string)stat_change[0] == "skill")
+                        protag.skill += (int)(long)stat_change[1];
+                    else if ((string)stat_change[0] == "luck")
+                        protag.luck += (int)(long)stat_change[1];
+                }
+            }
         }
 
         public virtual void Continue(string input){}
@@ -38,8 +53,8 @@ namespace FightingFantasy
 
     class StoryOnlyChapter : Chapter
     {
-        public StoryOnlyChapter(string story, int next_chapter)
-            : base(story)
+        public StoryOnlyChapter(string story, Protagonist protag, int next_chapter, object[][] stat_changes)
+            : base(story,protag,stat_changes)
         {
             NextChapter = next_chapter;
         }
@@ -54,8 +69,8 @@ namespace FightingFantasy
     {
         public object[][] Choices { get; set; }
         
-        public ChoiceChapter(string story, object[][] choices)
-            : base(story)
+        public ChoiceChapter(string story, Protagonist protag, object[][] choices, object[][] stat_changes)
+            : base(story,protag,stat_changes)
         {
             Choices = choices;
         }
@@ -89,16 +104,15 @@ namespace FightingFantasy
     {
         public List<Enemy> enemies;
         public string State { get; set; }
-        public Protagonist protag;
+        
         public object[][] choices { get; set; }
         private bool paused;
         private Battle battle;
 
-        public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter)
-            : base(story)
+        public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter, object[][] stat_changes)
+            : base(story,protag,stat_changes)
         {
             this.enemies = enemies;
-            this.protag = protag;
             NextChapter = next_chapter;
             paused = true;
 
