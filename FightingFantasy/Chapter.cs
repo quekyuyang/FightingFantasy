@@ -21,6 +21,13 @@ namespace FightingFantasy
         public bool IsActive { get; set; }
         public int NextChapter { get; set; }
 
+        public Chapter(string story)
+        {
+            Story = story;
+            Message = "";
+            IsActive = true;
+        }
+
         public virtual void Continue(string input){}
 
         public virtual string[] GetChoices()
@@ -32,11 +39,9 @@ namespace FightingFantasy
     class StoryOnlyChapter : Chapter
     {
         public StoryOnlyChapter(string story, int next_chapter)
+            : base(story)
         {
-            Story = story;
-            Message = "";
             NextChapter = next_chapter;
-            IsActive = true;
         }
 
         public override void Continue(string input)
@@ -50,11 +55,9 @@ namespace FightingFantasy
         public object[][] Choices { get; set; }
         
         public ChoiceChapter(string story, object[][] choices)
+            : base(story)
         {
-            Story = story;
-            Message = "";
             Choices = choices;
-            IsActive = true;
         }
 
         public override void Continue(string input)
@@ -92,14 +95,12 @@ namespace FightingFantasy
         private Battle battle;
 
         public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter)
+            : base(story)
         {
-            Story = story;
-            Message = "";
             this.enemies = enemies;
             this.protag = protag;
             NextChapter = next_chapter;
             paused = true;
-            IsActive = true;
 
             battle = new Battle(protag, enemies[0]);
         }
