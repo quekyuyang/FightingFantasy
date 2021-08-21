@@ -31,7 +31,7 @@ namespace FightingFantasy
 
         static private void DisplayChoices()
         {
-            string[] choices = Game.GetChoices();
+            List<string> choices = Game.GetChoices();
             int i = 1;
             foreach (string choice in choices)
             {

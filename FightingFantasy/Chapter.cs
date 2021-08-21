@@ -66,9 +66,9 @@ namespace FightingFantasy
 
         public virtual void Continue(string input){}
 
-        public virtual string[] GetChoices()
+        public virtual List<string> GetChoices()
         {
-            return new string[0];
+            return new List<string>();
         }
 
         public List<string> GetMessages()
@@ -93,21 +93,28 @@ namespace FightingFantasy
 
     class ChoiceChapter : Chapter
     {
-        public object[][] Choices { get; set; }
+        public List<string> Choices { get; set; }
+        private List<int> next_chapters;
 
-        public ChoiceChapter(string story, Protagonist protag, object[][] choices, object[][] stat_changes)
+        public ChoiceChapter(string story, Protagonist protag, List<(string,int)> choices, object[][] stat_changes)
             : base(story,protag,stat_changes)
         {
-            Choices = choices;
+            Choices = new List<string>();
+            next_chapters = new List<int>();
+
+            foreach ((string,int) choice in choices)
+            {
+                Choices.Add(choice.Item1);
+                next_chapters.Add(choice.Item2);
+            }
         }
 
         public override void Continue(string input)
         {
             int player_choice;
-            if (Int32.TryParse(input, out player_choice) && player_choice <= Choices.Length && player_choice >= 1)
+            if (Int32.TryParse(input, out player_choice) && player_choice <= next_chapters.Count && player_choice >= 1)
             {
-                long temp = (long)Choices[player_choice - 1][1];
-                NextChapter = (int)temp;
+                NextChapter = next_chapters[player_choice - 1];
                 IsActive = false;
             }
             else
@@ -116,13 +123,9 @@ namespace FightingFantasy
             }
         }
 
-        public override string[] GetChoices()
+        public override List<string> GetChoices()
         {
-            int n_choices = Choices.Length;
-            string[] choices = new string[n_choices];
-            for (int i = 0; i < n_choices; i++)
-                choices[i] = (string)Choices[i][0];
-            return choices;
+            return Choices;
         }
     }
 
@@ -145,7 +148,7 @@ namespace FightingFantasy
             battle = new Battle(protag, enemies[0]);
         }
 
-        public override string[] GetChoices()
+        public override List<string> GetChoices()
         {
             return battle.GetChoices();
         }

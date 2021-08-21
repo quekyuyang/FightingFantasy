@@ -29,7 +29,14 @@ namespace FightingFantasy
         {
             JsonChapter chapter_data = chapters[chapter_n];
             if (chapter_data.type == "choices")
-                current_chapter = new ChoiceChapter(chapter_data.story, protag, chapter_data.choices, chapter_data.stat_changes);
+            {
+                int n_choices = chapter_data.choices.Length;
+                var choices = new List<(string, int)>();
+                for (int i = 0; i < n_choices; i++)
+                    choices.Add(((string)chapter_data.choices[i][0],(int)(long)chapter_data.choices[i][1]));
+                current_chapter = new ChoiceChapter(chapter_data.story, protag, choices, chapter_data.stat_changes);
+            }
+                
             else if (chapter_data.type == "story_only")
                 current_chapter = new StoryOnlyChapter(chapter_data.story, protag, chapter_data.next_chapter, chapter_data.stat_changes);
             else if (chapter_data.type == "prebattle_choices")
@@ -46,7 +53,7 @@ namespace FightingFantasy
             else
                 return ("", -1, -1);
         }
-        static public string[] GetChoices()
+        static public List<string> GetChoices()
         {
             return current_chapter.GetChoices();
         }
@@ -144,12 +151,12 @@ namespace FightingFantasy
             }
         }
 
-        public string[] GetChoices()
+        public List<string> GetChoices()
         {
             if (ExpectInput)
-                return new string[] { "Yes", "No" };
+                return new List<string>{ "Yes", "No" };
             else
-                return new string[0];
+                return new List<string>();
         }
 
         private bool EnemyDead()
