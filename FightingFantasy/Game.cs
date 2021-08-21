@@ -51,9 +51,9 @@ namespace FightingFantasy
             return current_chapter.GetChoices();
         }
 
-        static public string GetMessage()
+        static public List<string> GetMessages()
         {
-            return current_chapter.Message;
+            return current_chapter.GetMessages();
         }
     }
 

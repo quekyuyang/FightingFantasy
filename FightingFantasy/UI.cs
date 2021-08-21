@@ -15,10 +15,18 @@ namespace FightingFantasy
             Console.WriteLine();
 
             DisplayEnemyStats();
-
             DisplayChoices();
-            Console.WriteLine(Game.GetMessage());
+            Console.WriteLine();
+            DisplayMessages();
             PromptResponse();
+        }
+
+        static private void DisplayMessages()
+        {
+            List<string> messages = Game.GetMessages();
+            foreach (string message in messages)
+                Console.WriteLine(message);
+            messages.Clear();
         }
 
         static private void DisplayChoices()

@@ -17,7 +17,7 @@ namespace FightingFantasy
     class Chapter
     {
         public string Story { get; set; }
-        public string Message { get; set; }
+        public List<string> Messages { get; set; }
         public bool IsActive { get; set; }
         public int NextChapter { get; set; }
         public Protagonist protag;
@@ -25,20 +25,41 @@ namespace FightingFantasy
         public Chapter(string story, Protagonist protag, object[][] stat_changes)
         {
             Story = story;
-            Message = "";
             IsActive = true;
             this.protag = protag;
+            Messages = new List<string>();
 
             if (stat_changes != null)
             {
                 foreach (object[] stat_change in stat_changes)
                 {
-                    if ((string)stat_change[0] == "stamina")
-                        protag.stamina += (int)(long)stat_change[1];
-                    else if ((string)stat_change[0] == "skill")
-                        protag.skill += (int)(long)stat_change[1];
-                    else if ((string)stat_change[0] == "luck")
-                        protag.luck += (int)(long)stat_change[1];
+                    string stat_name = (string)stat_change[0];
+                    int change = (int)(long)stat_change[1];
+                    if (stat_name == "stamina")
+                    {
+                        protag.stamina += change;
+                        if (change < 0)
+                            Messages.Add($"You took {-change} damage!");
+                        else
+                            Messages.Add($"You recovered {change} stamina!");
+                    }
+                    else if (stat_name == "skill")
+                    {
+                        protag.skill += change;
+                        if (change < 0)
+                            Messages.Add($"Your skill decreased by {-change}!");
+                        else
+                            Messages.Add($"Your skill increased by {change}!");
+                    }
+                    else if (stat_name == "luck")
+                    {
+                        protag.luck += change;
+                        if (change < 0)
+                            Messages.Add($"Your luck decreased by {-change}!");
+                        else
+                            Messages.Add($"Your luck increased by {change}!");
+                    }
+                        
                 }
             }
         }
@@ -48,6 +69,11 @@ namespace FightingFantasy
         public virtual string[] GetChoices()
         {
             return new string[0];
+        }
+
+        public List<string> GetMessages()
+        {
+            return Messages;
         }
     }
 
@@ -68,7 +94,7 @@ namespace FightingFantasy
     class ChoiceChapter : Chapter
     {
         public object[][] Choices { get; set; }
-        
+
         public ChoiceChapter(string story, Protagonist protag, object[][] choices, object[][] stat_changes)
             : base(story,protag,stat_changes)
         {
@@ -86,7 +112,7 @@ namespace FightingFantasy
             }
             else
             {
-                Message = "Invalid choice. Please enter a number corresponding to one of the choices above.";
+                Messages.Add("Invalid choice. Please enter a number corresponding to one of the choices above.");
             }
         }
 
@@ -126,8 +152,6 @@ namespace FightingFantasy
 
         public override void Continue(string input)
         {
-            Message = "";
-
             if (battle.BattleEnded)
             {
                 ReadyNextEnemy();
@@ -137,12 +161,12 @@ namespace FightingFantasy
             int player_choice;
             if (!Int32.TryParse(input, out player_choice) || player_choice > 2 || player_choice < 1)
             {
-                Message = "Invalid choice. Please enter a number corresponding to one of the choices above.";
+                Messages.Add("Invalid choice. Please enter a number corresponding to one of the choices above.");
                 return;
             }
 
             battle.RunNextRound(player_choice);
-            Message = battle.Message;
+            Messages.Add(battle.Message);
         }
 
         private void ReadyNextEnemy()
