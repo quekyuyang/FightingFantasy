@@ -28,19 +28,28 @@ namespace FightingFantasy
         static private void GoToChapter(int chapter_n)
         {
             JsonChapter chapter_data = chapters[chapter_n];
+
+            var stat_changes = new List<(string, int)>();
+            if (chapter_data.stat_changes != null)
+            {
+                int n_changes = chapter_data.stat_changes.Length;
+                for (int i = 0; i < n_changes; i++)
+                    stat_changes.Add(((string)chapter_data.stat_changes[i][0], (int)(long)chapter_data.stat_changes[i][1]));
+            }
+
             if (chapter_data.type == "choices")
             {
                 int n_choices = chapter_data.choices.Length;
                 var choices = new List<(string, int)>();
                 for (int i = 0; i < n_choices; i++)
                     choices.Add(((string)chapter_data.choices[i][0],(int)(long)chapter_data.choices[i][1]));
-                current_chapter = new ChoiceChapter(chapter_data.story, protag, choices, chapter_data.stat_changes);
+                current_chapter = new ChoiceChapter(chapter_data.story, protag, choices, stat_changes);
             }
                 
             else if (chapter_data.type == "story_only")
-                current_chapter = new StoryOnlyChapter(chapter_data.story, protag, chapter_data.next_chapter, chapter_data.stat_changes);
+                current_chapter = new StoryOnlyChapter(chapter_data.story, protag, chapter_data.next_chapter, stat_changes);
             else if (chapter_data.type == "prebattle_choices")
-                current_chapter = new BattleChapter(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter, chapter_data.stat_changes);
+                current_chapter = new BattleChapter(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter, stat_changes);
         }
 
         static public Type GetChapterType() => current_chapter.GetType();

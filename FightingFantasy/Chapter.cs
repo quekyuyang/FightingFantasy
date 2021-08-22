@@ -22,45 +22,42 @@ namespace FightingFantasy
         public int NextChapter { get; set; }
         public Protagonist protag;
 
-        public Chapter(string story, Protagonist protag, object[][] stat_changes)
+        public Chapter(string story, Protagonist protag, List<(string,int)> stat_changes)
         {
             Story = story;
             IsActive = true;
             this.protag = protag;
             Messages = new List<string>();
 
-            if (stat_changes != null)
+            foreach ((string,int) stat_change in stat_changes)
             {
-                foreach (object[] stat_change in stat_changes)
+                string stat_name = stat_change.Item1;
+                int change = stat_change.Item2;
+                if (stat_name == "stamina")
                 {
-                    string stat_name = (string)stat_change[0];
-                    int change = (int)(long)stat_change[1];
-                    if (stat_name == "stamina")
-                    {
-                        protag.stamina += change;
-                        if (change < 0)
-                            Messages.Add($"You took {-change} damage!");
-                        else
-                            Messages.Add($"You recovered {change} stamina!");
-                    }
-                    else if (stat_name == "skill")
-                    {
-                        protag.skill += change;
-                        if (change < 0)
-                            Messages.Add($"Your skill decreased by {-change}!");
-                        else
-                            Messages.Add($"Your skill increased by {change}!");
-                    }
-                    else if (stat_name == "luck")
-                    {
-                        protag.luck += change;
-                        if (change < 0)
-                            Messages.Add($"Your luck decreased by {-change}!");
-                        else
-                            Messages.Add($"Your luck increased by {change}!");
-                    }
-                        
+                    protag.stamina += change;
+                    if (change < 0)
+                        Messages.Add($"You took {-change} damage!");
+                    else
+                        Messages.Add($"You recovered {change} stamina!");
                 }
+                else if (stat_name == "skill")
+                {
+                    protag.skill += change;
+                    if (change < 0)
+                        Messages.Add($"Your skill decreased by {-change}!");
+                    else
+                        Messages.Add($"Your skill increased by {change}!");
+                }
+                else if (stat_name == "luck")
+                {
+                    protag.luck += change;
+                    if (change < 0)
+                        Messages.Add($"Your luck decreased by {-change}!");
+                    else
+                        Messages.Add($"Your luck increased by {change}!");
+                }
+                        
             }
         }
 
@@ -79,7 +76,7 @@ namespace FightingFantasy
 
     class StoryOnlyChapter : Chapter
     {
-        public StoryOnlyChapter(string story, Protagonist protag, int next_chapter, object[][] stat_changes)
+        public StoryOnlyChapter(string story, Protagonist protag, int next_chapter, List<(string, int)> stat_changes)
             : base(story,protag,stat_changes)
         {
             NextChapter = next_chapter;
@@ -96,7 +93,7 @@ namespace FightingFantasy
         public List<string> Choices { get; set; }
         private List<int> next_chapters;
 
-        public ChoiceChapter(string story, Protagonist protag, List<(string,int)> choices, object[][] stat_changes)
+        public ChoiceChapter(string story, Protagonist protag, List<(string,int)> choices, List<(string, int)> stat_changes)
             : base(story,protag,stat_changes)
         {
             Choices = new List<string>();
@@ -138,7 +135,7 @@ namespace FightingFantasy
         private bool paused;
         private Battle battle;
 
-        public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter, object[][] stat_changes)
+        public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter, List<(string, int)> stat_changes)
             : base(story,protag,stat_changes)
         {
             this.enemies = enemies;
