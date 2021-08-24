@@ -21,7 +21,7 @@ namespace FightingFantasy
         static public void Continue(string input)
         {
             current_chapter.Continue(input);
-            if (!current_chapter.IsActive)
+            if (current_chapter.Ended)
                 GoToChapter(current_chapter.NextChapter);
         }
 
@@ -43,17 +43,16 @@ namespace FightingFantasy
                 var choices = new List<(string, int)>();
                 for (int i = 0; i < n_choices; i++)
                     choices.Add(((string)chapter_data.choices[i][0],(int)(long)chapter_data.choices[i][1]));
-                current_chapter = new ChoiceChapter(chapter_data.story, protag, choices, stat_changes);
+                current_chapter = new ChoiceChapter(chapter_data.story, protag, choices);
             }
                 
             else if (chapter_data.type == "story_only")
                 current_chapter = new StoryOnlyChapter(chapter_data.story, protag, chapter_data.next_chapter, stat_changes);
             else if (chapter_data.type == "prebattle_choices")
-                current_chapter = new BattleChapter(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter, stat_changes);
+                current_chapter = new BattleChapter(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter);
         }
 
-        static public Type GetChapterType() => current_chapter.GetType();
-        static public string GetStory() => current_chapter.Story;
+        static public string GetStory() => current_chapter.GetStory();
         static public (int,int,int) GetProtagStats() => (protag.stamina,protag.skill,protag.luck);
         static public (string,int,int) GetEnemyStats()
         {

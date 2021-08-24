@@ -16,172 +16,87 @@ namespace FightingFantasy
 
     class Chapter
     {
-        public string Story { get; set; }
         public List<string> Messages { get; set; }
-        public bool IsActive { get; set; }
-        public int NextChapter { get; set; }
-        public Protagonist protag;
-
-        public Chapter(string story, Protagonist protag, List<(string,int)> stat_changes)
+        public bool Ended { get; set; }
+        protected Queue<Event> events;
+        protected Event current_event;
+        public int NextChapter
         {
-            Story = story;
-            IsActive = true;
-            this.protag = protag;
-            Messages = new List<string>();
+            get => current_event.NextChapter;
+        }
 
-            foreach ((string,int) stat_change in stat_changes)
+        public Chapter()
+        {
+            events = new Queue<Event>();
+        }
+
+        public virtual void Continue(string input)
+        {
+            current_event.Continue(input);
+            if (current_event.Ended)
             {
-                string stat_name = stat_change.Item1;
-                int change = stat_change.Item2;
-                if (stat_name == "stamina")
+                if (events.Count > 0)
                 {
-                    protag.stamina += change;
-                    if (change < 0)
-                        Messages.Add($"You took {-change} damage!");
-                    else
-                        Messages.Add($"You recovered {change} stamina!");
+                    current_event = events.Dequeue();
+                    current_event.Start();
                 }
-                else if (stat_name == "skill")
-                {
-                    protag.skill += change;
-                    if (change < 0)
-                        Messages.Add($"Your skill decreased by {-change}!");
-                    else
-                        Messages.Add($"Your skill increased by {change}!");
-                }
-                else if (stat_name == "luck")
-                {
-                    protag.luck += change;
-                    if (change < 0)
-                        Messages.Add($"Your luck decreased by {-change}!");
-                    else
-                        Messages.Add($"Your luck increased by {change}!");
-                }
-                        
+                else
+                    Ended = true;
             }
         }
 
-        public virtual void Continue(string input){}
-
-        public virtual List<string> GetChoices()
+        public string GetStory()
         {
-            return new List<string>();
+            return current_event.Story;
+        }
+
+        public List<string> GetChoices()
+        {
+            return current_event.Choices;
         }
 
         public List<string> GetMessages()
         {
-            return Messages;
+            return current_event.Messages;
         }
     }
 
     class StoryOnlyChapter : Chapter
     {
         public StoryOnlyChapter(string story, Protagonist protag, int next_chapter, List<(string, int)> stat_changes)
-            : base(story,protag,stat_changes)
+            : base()
         {
-            NextChapter = next_chapter;
-        }
-
-        public override void Continue(string input)
-        {
-            IsActive = false;
+            current_event = new StoryEvent(story, protag, next_chapter, stat_changes);
+            current_event.Start();
         }
     }
 
     class ChoiceChapter : Chapter
     {
         public List<string> Choices { get; set; }
-        private List<int> next_chapters;
 
-        public ChoiceChapter(string story, Protagonist protag, List<(string,int)> choices, List<(string, int)> stat_changes)
-            : base(story,protag,stat_changes)
+        public ChoiceChapter(string story, Protagonist protag, List<(string,int)> choices)
+            : base()
         {
-            Choices = new List<string>();
-            next_chapters = new List<int>();
-
-            foreach ((string,int) choice in choices)
-            {
-                Choices.Add(choice.Item1);
-                next_chapters.Add(choice.Item2);
-            }
-        }
-
-        public override void Continue(string input)
-        {
-            int player_choice;
-            if (Int32.TryParse(input, out player_choice) && player_choice <= next_chapters.Count && player_choice >= 1)
-            {
-                NextChapter = next_chapters[player_choice - 1];
-                IsActive = false;
-            }
-            else
-            {
-                Messages.Add("Invalid choice. Please enter a number corresponding to one of the choices above.");
-            }
-        }
-
-        public override List<string> GetChoices()
-        {
-            return Choices;
+            current_event = new ChoiceEvent(story, protag, choices);
+            current_event.Start();
         }
     }
 
     class BattleChapter : Chapter
     {
         public List<Enemy> enemies;
-        public string State { get; set; }
         
-        public object[][] choices { get; set; }
-        private bool paused;
-        private Battle battle;
-
-        public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter, List<(string, int)> stat_changes)
-            : base(story,protag,stat_changes)
+        public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter)
+            : base()
         {
-            this.enemies = enemies;
-            NextChapter = next_chapter;
-            paused = true;
-
-            battle = new Battle(protag, enemies[0]);
-        }
-
-        public override List<string> GetChoices()
-        {
-            return battle.GetChoices();
-        }
-
-        public override void Continue(string input)
-        {
-            if (battle.BattleEnded)
-            {
-                ReadyNextEnemy();
-                return;
-            }
-                
-            int player_choice;
-            if (!Int32.TryParse(input, out player_choice) || player_choice > 2 || player_choice < 1)
-            {
-                Messages.Add("Invalid choice. Please enter a number corresponding to one of the choices above.");
-                return;
-            }
-
-            battle.RunNextRound(player_choice);
-            Messages.Add(battle.Message);
-        }
-
-        private void ReadyNextEnemy()
-        {
-            enemies.RemoveAt(0);
-            if (enemies.Count == 0)
-                IsActive = false;
-            else
-                battle = new Battle(protag,enemies[0]);
+            current_event = new BattleEvent(story, protag, enemies, next_chapter);
+            current_event.Start();
         }
 
         public (string,int,int) GetEnemyStats()
         {
-            Enemy enemy = enemies[0];
-            return (enemy.name,enemy.stamina, enemy.skill);
+            return (current_event as BattleEvent).GetEnemyStats();
         }
     }
 
