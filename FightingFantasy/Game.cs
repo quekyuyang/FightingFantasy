@@ -6,13 +6,13 @@ namespace FightingFantasy
 {
     class Game
     {
-        static private Dictionary<int, JsonChapter> chapters;
+        static private ChapterFactory chapter_factory;
         static private Chapter current_chapter;
         static private Protagonist protag;
 
-        static public void Start(Dictionary<int, JsonChapter> chapters)
+        static public void Start(ChapterFactory chapter_factory)
         {
-            Game.chapters = chapters;
+            Game.chapter_factory = chapter_factory;
             protag = new Protagonist();
             int chapter_n = 1;
             GoToChapter(chapter_n);
@@ -27,29 +27,7 @@ namespace FightingFantasy
 
         static private void GoToChapter(int chapter_n)
         {
-            JsonChapter chapter_data = chapters[chapter_n];
-
-            var stat_changes = new List<(string, int)>();
-            if (chapter_data.stat_changes != null)
-            {
-                int n_changes = chapter_data.stat_changes.Length;
-                for (int i = 0; i < n_changes; i++)
-                    stat_changes.Add(((string)chapter_data.stat_changes[i][0], (int)(long)chapter_data.stat_changes[i][1]));
-            }
-
-            if (chapter_data.type == "choices")
-            {
-                int n_choices = chapter_data.choices.Length;
-                var choices = new List<(string, int)>();
-                for (int i = 0; i < n_choices; i++)
-                    choices.Add(((string)chapter_data.choices[i][0],(int)(long)chapter_data.choices[i][1]));
-                current_chapter = new ChoiceChapter(chapter_data.story, protag, choices);
-            }
-                
-            else if (chapter_data.type == "story_only")
-                current_chapter = new StoryOnlyChapter(chapter_data.story, protag, chapter_data.next_chapter, stat_changes);
-            else if (chapter_data.type == "prebattle_choices")
-                current_chapter = new BattleChapter(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter);
+            current_chapter = chapter_factory.CreateChapter(chapter_n, protag);
         }
 
         static public string GetStory() => current_chapter.GetStory();
