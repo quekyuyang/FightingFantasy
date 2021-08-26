@@ -108,8 +108,6 @@ namespace FightingFantasy
 
     class ChoiceChapter : Chapter
     {
-        public List<string> Choices { get; set; }
-
         public ChoiceChapter(string story, Protagonist protag, List<(string,int)> choices)
             : base()
         {
@@ -119,9 +117,7 @@ namespace FightingFantasy
     }
 
     class BattleChapter : Chapter
-    {
-        public List<Enemy> enemies;
-        
+    {        
         public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter)
             : base()
         {
