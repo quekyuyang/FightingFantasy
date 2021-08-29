@@ -28,12 +28,15 @@ namespace FightingFantasy
     class Protagonist:Character
     {
         public int luck;
+        private Dictionary<Item,int> inventory;
 
         public Protagonist()
         {
             stamina = Dice.SumRoll(2) + 12;
             skill = Dice.SumRoll(1) + 6;
             luck = Dice.SumRoll(1) + 6;
+
+            inventory = new Dictionary<Item, int>();
         }
 
         public bool TestLuck()
@@ -41,6 +44,26 @@ namespace FightingFantasy
             bool is_lucky = Dice.SumRoll(2) <= luck;
             luck -= 1;
             return is_lucky;
+        }
+
+        public void AddToInventory(Item item, int amount)
+        {
+            if (HasItem(item))
+                inventory[item] += amount;
+            else
+                inventory.Add(item, amount);
+        }
+
+        public void RemoveFromInventory(Item item)
+        {
+            inventory[item] -= 1;
+            if (inventory[item] == 0)
+                inventory.Remove(item);
+        }
+
+        public bool HasItem(Item item)
+        {
+            return inventory.ContainsKey(item);
         }
     }
 
