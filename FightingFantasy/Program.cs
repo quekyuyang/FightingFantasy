@@ -9,8 +9,8 @@ namespace FightingFantasy
     {
         static void Main(string[] args)
         {
-            string jstring = File.ReadAllText(@"c:\Users\queky\Downloads\story2.json");
-            Dictionary<int, JsonChapter> chapters = JsonConvert.DeserializeObject<Dictionary<int, JsonChapter>>(jstring);
+            string jstring_chapters = File.ReadAllText(@"c:\Users\queky\Downloads\story2.json");
+            Dictionary<int, JsonChapter> chapters = JsonConvert.DeserializeObject<Dictionary<int, JsonChapter>>(jstring_chapters);
             ChapterFactory chapter_factory = new ChapterFactory(chapters);
             Game.Start(chapter_factory);
             

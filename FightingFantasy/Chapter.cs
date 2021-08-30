@@ -8,25 +8,30 @@ namespace FightingFantasy
     {
         public string type;
         public string story;
+        public string story2;
         public int next_chapter;
         public object[][] choices;
         public List<Enemy> enemies;
         public object[][] stat_changes;
+        public object[][] items;
     }
 
     class ChapterData
     {
         public string type;
         public string story;
+        public string story2;
         public int next_chapter;
         public List<(string, int)> choices;
         public List<Enemy> enemies;
         public List<(string, int)> stat_changes;
+        public List<(string, int)> items;
 
         public ChapterData(JsonChapter json_chapter)
         {
             type = json_chapter.type;
             story = json_chapter.story;
+            story2 = json_chapter.story2;
             next_chapter = json_chapter.next_chapter;
             enemies = json_chapter.enemies;
 
@@ -44,6 +49,14 @@ namespace FightingFantasy
                 int n_changes = json_chapter.stat_changes.Length;
                 for (int i = 0; i < n_changes; i++)
                     stat_changes.Add(((string)json_chapter.stat_changes[i][0], (int)(long)json_chapter.stat_changes[i][1]));
+            }
+
+            items = new List<(string, int)>();
+            if (json_chapter.items != null)
+            {
+                int n_changes = json_chapter.items.Length;
+                for (int i = 0; i < n_changes; i++)
+                    items.Add(((string)json_chapter.items[i][0], (int)(long)json_chapter.items[i][1]));
             }
         }
     }
@@ -63,7 +76,7 @@ namespace FightingFantasy
             if (chapter_data.type == "choices")
                 return new ChoiceChapter(chapter_data.story, protag, chapter_data.choices);
             else if (chapter_data.type == "story_only")
-                return new StoryOnlyChapter(chapter_data.story, protag, chapter_data.next_chapter, chapter_data.stat_changes);
+                return new StoryOnlyChapter(chapter_data.story, protag, chapter_data.next_chapter, chapter_data.stat_changes, chapter_data.items);
             else if (chapter_data.type == "battle")
                 return new BattleChapter(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter);
             else
@@ -75,6 +88,8 @@ namespace FightingFantasy
             var chapter_data = new ChapterData(chapters[chapter_n]);
             switch (chapter_n)
             {
+                case 235:
+                    return new Chapter235(chapter_data, protag);
                 case 383:
                     return new Chapter383(chapter_data, protag);
                 default:
@@ -132,10 +147,10 @@ namespace FightingFantasy
 
     class StoryOnlyChapter : Chapter
     {
-        public StoryOnlyChapter(string story, Protagonist protag, int next_chapter, List<(string, int)> stat_changes)
+        public StoryOnlyChapter(string story, Protagonist protag, int next_chapter, List<(string, int)> stat_changes, List<(string, int)> items)
             : base()
         {
-            current_event = new StoryEvent(story, protag, next_chapter, stat_changes);
+            current_event = new StoryEvent(story, protag, next_chapter, stat_changes, items);
             current_event.Start();
         }
     }
@@ -165,12 +180,25 @@ namespace FightingFantasy
         }
     }
 
-    class Chapter383: Chapter
+    class Chapter235 : Chapter
+    {
+        public Chapter235(ChapterData chapter_data, Protagonist protag)
+        {
+            events.Enqueue(new ItemEvent235(chapter_data.story, protag));
+            events.Enqueue(new StoryEvent(chapter_data.story2, protag, 0, chapter_data.stat_changes, chapter_data.items));
+            events.Enqueue(new ChoiceEvent("What will you do next?", protag, chapter_data.choices));
+
+            current_event = events.Dequeue();
+            current_event.Start();
+        }
+    }
+
+    class Chapter383 : Chapter
     {
         public Chapter383(ChapterData chapter_data, Protagonist protag)
         {
             List<(string, int)> stat_changes = chapter_data.stat_changes;
-            events.Enqueue(new StoryEvent(chapter_data.story, protag, 0, stat_changes));
+            events.Enqueue(new StoryEvent(chapter_data.story, protag, 0, stat_changes, chapter_data.items));
             events.Enqueue(new ChoiceEvent("What will you do?", protag, chapter_data.choices));
 
             current_event = events.Dequeue();

@@ -6,6 +6,17 @@ namespace FightingFantasy
 {
     class Item
     {
+        static public Item CreateItem(string item_name)
+        {
+            switch (item_name)
+            {
+                case "enchanted sword":
+                    return new Item(item_name, ("skill", 2));
+                default:
+                    return new Item(item_name);
+            }
+        }
+
         public string Name { get; }
         public (string, int) Effect
         { 

@@ -29,12 +29,14 @@ namespace FightingFantasy
     class StoryEvent : Event
     {
         private List<(string, int)> stat_changes;
-        
-        public StoryEvent(string story, Protagonist protag, int next_chapter, List<(string, int)> stat_changes)
+        private List<(string, int)> items;
+
+        public StoryEvent(string story, Protagonist protag, int next_chapter, List<(string, int)> stat_changes, List<(string, int)> items)
             : base(story, protag)
         {
             NextChapter = next_chapter;
             this.stat_changes = stat_changes;
+            this.items = items;
             Choices = new List<string>();
         }
 
@@ -68,6 +70,12 @@ namespace FightingFantasy
                     else
                         Messages.Add($"Your luck increased by {change}!");
                 }
+            }
+
+            foreach ((string, int) item in items)
+            {
+                protag.AddToInventory(Item.CreateItem(item.Item1), item.Item2);
+                Messages.Add($"You obtained {item.Item2} {item.Item1}!");
             }
         }
 
@@ -161,6 +169,56 @@ namespace FightingFantasy
         {
             Enemy enemy = enemies[0];
             return (enemy.name, enemy.stamina, enemy.skill);
+        }
+    }
+
+    class ItemEvent235 : Event
+    {
+        public ItemEvent235(string story, Protagonist protag)
+            : base(story,protag)
+        {
+            string item1 = "gold pieces";
+            string item2 = "copper-colored key";
+            string item3 = "ointment";
+
+            Choices = new List<string>()
+            {
+                $"{item1} and {item2}",
+                $"{item2} and {item3}",
+                $"{item1} and {item3}"
+            };
+        }
+
+        public override void Continue(string input)
+        {
+            int player_choice;
+            if (Int32.TryParse(input, out player_choice) && player_choice <= Choices.Count && player_choice >= 1)
+            {
+                Item gold = Item.CreateItem("gold pieces");
+                Item copper_key = Item.CreateItem("copper-colored key");
+                Item ointment = Item.CreateItem("ointment");
+
+                switch (player_choice)
+                {
+                    case 1:
+                        protag.AddToInventory(gold, 8);
+                        protag.AddToInventory(copper_key, 1);
+                        break;
+                    case 2:
+                        protag.AddToInventory(copper_key, 1);
+                        protag.AddToInventory(ointment, 1);
+                        break;
+                    case 3:
+                        protag.AddToInventory(gold, 8);
+                        protag.AddToInventory(ointment, 1);
+                        break;
+                }
+                Ended = true;
+            }
+            else
+            {
+                Messages.Add("Invalid choice. Please enter a number corresponding to one of the choices above.");
+            }
         }
     }
 }
