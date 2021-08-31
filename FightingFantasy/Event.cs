@@ -23,7 +23,7 @@ namespace FightingFantasy
 
         public virtual void Start() { }
 
-        public virtual void Continue(string input) { }
+        public virtual void Continue(int input) { }
     }
 
     class StoryEvent : Event
@@ -79,7 +79,7 @@ namespace FightingFantasy
             }
         }
 
-        public override void Continue(string input)
+        public override void Continue(int input)
         {
             Ended = true;
         }
@@ -101,12 +101,11 @@ namespace FightingFantasy
             }
         }
 
-        public override void Continue(string input)
+        public override void Continue(int input)
         {
-            int player_choice;
-            if (Int32.TryParse(input, out player_choice) && player_choice <= next_chapters.Count && player_choice >= 1)
+            if (input <= next_chapters.Count && input >= 1)
             {
-                NextChapter = next_chapters[player_choice - 1];
+                NextChapter = next_chapters[input - 1];
                 Ended = true;
             }
             else
@@ -137,7 +136,7 @@ namespace FightingFantasy
             battle = new Battle(protag, enemies[0]);
         }
 
-        public override void Continue(string input)
+        public override void Continue(int input)
         {
             if (battle.BattleEnded)
             {
@@ -145,14 +144,13 @@ namespace FightingFantasy
                 return;
             }
 
-            int player_choice;
-            if (!Int32.TryParse(input, out player_choice) || player_choice > 2 || player_choice < 1)
+            if (input > 2 || input < 1)
             {
                 Messages.Add("Invalid choice. Please enter a number corresponding to one of the choices above.");
                 return;
             }
 
-            battle.RunNextRound(player_choice);
+            battle.RunNextRound(input);
             Messages.Add(battle.Message);
         }
 
@@ -189,16 +187,15 @@ namespace FightingFantasy
             };
         }
 
-        public override void Continue(string input)
+        public override void Continue(int input)
         {
-            int player_choice;
-            if (Int32.TryParse(input, out player_choice) && player_choice <= Choices.Count && player_choice >= 1)
+            if (input <= Choices.Count && input >= 1)
             {
                 Item gold = Item.CreateItem("gold pieces");
                 Item copper_key = Item.CreateItem("copper-colored key");
                 Item ointment = Item.CreateItem("ointment");
 
-                switch (player_choice)
+                switch (input)
                 {
                     case 1:
                         protag.AddToInventory(gold, 8);

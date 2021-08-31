@@ -9,20 +9,48 @@ namespace FightingFantasy
         static private ChapterFactory chapter_factory;
         static private Chapter current_chapter;
         static private Protagonist protag;
+        static public StateEnum State
+        {
+            get;
+            private set;
+        }
+
+        public enum StateEnum
+        {
+            Normal,
+            Items
+        }
 
         static public void Start(ChapterFactory chapter_factory)
         {
             Game.chapter_factory = chapter_factory;
             protag = new Protagonist();
+            State = StateEnum.Normal;
             int chapter_n = 1;
             GoToChapter(chapter_n);
         }
 
         static public void Continue(string input)
         {
-            current_chapter.Continue(input);
-            if (current_chapter.Ended)
-                GoToChapter(current_chapter.NextChapter);
+            if (State == StateEnum.Normal)
+            {
+                int input_num = 0;
+                if (Int32.TryParse(input, out input_num))
+                    current_chapter.Continue(input_num);
+                else if (input == "i")
+                    State = StateEnum.Items;
+                else if (input == "q")
+                    System.Environment.Exit(1);
+                if (current_chapter.Ended)
+                    GoToChapter(current_chapter.NextChapter);
+            }
+            else if (State == StateEnum.Items)
+            {
+                State = StateEnum.Normal;
+            }
+            else
+                new Exception("Invalid game state!");
+
         }
 
         static private void GoToChapter(int chapter_n)
@@ -32,6 +60,7 @@ namespace FightingFantasy
 
         static public string GetStory() => current_chapter.GetStory();
         static public (int,int,int) GetProtagStats() => (protag.stamina,protag.skill,protag.luck);
+        static public Dictionary<Item, int> GetProtagInventory() => protag.Inventory;
         static public (string,int,int) GetEnemyStats()
         {
             if (current_chapter is BattleChapter battle_chapter)

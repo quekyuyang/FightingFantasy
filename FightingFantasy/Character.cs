@@ -28,7 +28,11 @@ namespace FightingFantasy
     class Protagonist:Character
     {
         public int luck;
-        private Dictionary<Item,int> inventory;
+        private Dictionary<Item, int> inventory;
+        public Dictionary<Item,int> Inventory
+        {
+            get { return new Dictionary<Item,int>(inventory); }
+        }
 
         public Protagonist()
         {

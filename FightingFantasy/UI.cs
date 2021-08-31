@@ -9,15 +9,27 @@ namespace FightingFantasy
         static public void Update()
         {
             Console.Clear();
-            DisplayCharacterStats();
 
-            Console.WriteLine(Game.GetStory());
-            Console.WriteLine();
+            if (Game.State == Game.StateEnum.Normal)
+            {
+                DisplayCharacterStats();
 
-            DisplayEnemyStats();
-            DisplayChoices();
-            Console.WriteLine();
-            DisplayMessages();
+                Console.WriteLine(Game.GetStory());
+                Console.WriteLine();
+
+                DisplayEnemyStats();
+                DisplayChoices();
+                Console.WriteLine();
+                DisplayMessages();
+            }
+            else if (Game.State == Game.StateEnum.Items)
+            {
+                Dictionary<Item, int> inventory = Game.GetProtagInventory();
+                String s = "";
+                foreach (KeyValuePair<Item,int> slot in inventory)
+                    s += String.Format("{0,-30} {1,-5}\n", slot.Key, slot.Value);
+                Console.WriteLine(s);
+            }
             PromptResponse();
         }
 

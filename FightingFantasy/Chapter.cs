@@ -114,7 +114,7 @@ namespace FightingFantasy
             events = new Queue<Event>();
         }
 
-        public virtual void Continue(string input)
+        public virtual void Continue(int input)
         {
             current_event.Continue(input);
             if (current_event.Ended)
