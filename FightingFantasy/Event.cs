@@ -31,12 +31,12 @@ namespace FightingFantasy
         private List<(string, int)> stat_changes;
         private List<(string, int)> items;
 
-        public StoryEvent(string story, Protagonist protag, int next_chapter, List<(string, int)> stat_changes, List<(string, int)> items)
+        public StoryEvent(string story, Protagonist protag, int next_chapter, List<(string, int)> stat_changes = null, List<(string, int)> items = null)
             : base(story, protag)
         {
             NextChapter = next_chapter;
-            this.stat_changes = stat_changes;
-            this.items = items;
+            this.stat_changes = stat_changes ?? new List<(string,int)>();
+            this.items = items ?? new List<(string,int)>();
             Choices = new List<string>();
         }
 
