@@ -19,7 +19,8 @@ namespace FightingFantasy
         {
             Normal,
             Items,
-            Battle
+            Battle,
+            GameOver
         }
 
         static public void Start(ChapterFactory chapter_factory)
@@ -35,6 +36,12 @@ namespace FightingFantasy
         {
             if (State == StateEnum.Normal || State == StateEnum.Battle)
             {
+                if (protag.stamina <= 0)
+                {
+                    State = StateEnum.GameOver;
+                    return;
+                }
+
                 int input_num = 0;
                 if (Int32.TryParse(input, out input_num))
                     current_chapter.Continue(input_num);
@@ -58,6 +65,8 @@ namespace FightingFantasy
             {
                 State = StateEnum.Normal;
             }
+            else if (State == StateEnum.GameOver)
+                System.Environment.Exit(1);
             else
                 new Exception("Invalid game state!");
         }

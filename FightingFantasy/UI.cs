@@ -26,7 +26,7 @@ namespace FightingFantasy
             {
                 Dictionary<Item, int> inventory = Game.GetProtagInventory();
                 String s = "";
-                foreach (KeyValuePair<Item,int> slot in inventory)
+                foreach (KeyValuePair<Item, int> slot in inventory)
                     s += String.Format("{0,-30} {1,-5}\n", slot.Key, slot.Value);
                 Console.WriteLine(s);
             }
@@ -37,6 +37,8 @@ namespace FightingFantasy
                 DisplayMessages();
                 Console.WriteLine();
             }
+            else if (Game.State == Game.StateEnum.GameOver)
+                Console.WriteLine("Game Over!");
             PromptResponse();
         }
 
