@@ -18,7 +18,8 @@ namespace FightingFantasy
         public enum StateEnum
         {
             Normal,
-            Items
+            Items,
+            Battle
         }
 
         static public void Start(ChapterFactory chapter_factory)
@@ -32,17 +33,26 @@ namespace FightingFantasy
 
         static public void Continue(string input)
         {
-            if (State == StateEnum.Normal)
+            if (State == StateEnum.Normal || State == StateEnum.Battle)
             {
                 int input_num = 0;
                 if (Int32.TryParse(input, out input_num))
                     current_chapter.Continue(input_num);
                 else if (input == "i")
+                {
                     State = StateEnum.Items;
+                    return;
+                }
                 else if (input == "q")
                     System.Environment.Exit(1);
+
                 if (current_chapter.Ended)
                     GoToChapter(current_chapter.NextChapter);
+
+                if (current_chapter.InBattle)
+                    State = StateEnum.Battle;
+                else
+                    State = StateEnum.Normal;
             }
             else if (State == StateEnum.Items)
             {
@@ -50,7 +60,6 @@ namespace FightingFantasy
             }
             else
                 new Exception("Invalid game state!");
-
         }
 
         static private void GoToChapter(int chapter_n)

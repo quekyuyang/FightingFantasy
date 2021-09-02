@@ -108,6 +108,10 @@ namespace FightingFantasy
         {
             get => current_event.NextChapter;
         }
+        public bool InBattle
+        {
+            get => current_event is BattleEvent;
+        }
 
         public Chapter()
         {
@@ -170,7 +174,10 @@ namespace FightingFantasy
         public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter)
             : base()
         {
-            current_event = new BattleEvent(story, protag, enemies, next_chapter);
+            events.Enqueue(new StoryEvent(story, protag, 0));
+            events.Enqueue(new BattleEvent(story, protag, enemies, next_chapter));
+
+            current_event = events.Dequeue();
             current_event.Start();
         }
 

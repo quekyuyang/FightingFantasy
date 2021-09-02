@@ -17,10 +17,10 @@ namespace FightingFantasy
                 Console.WriteLine(Game.GetStory());
                 Console.WriteLine();
 
-                DisplayEnemyStats();
                 DisplayChoices();
                 Console.WriteLine();
                 DisplayMessages();
+                Console.WriteLine();
             }
             else if (Game.State == Game.StateEnum.Items)
             {
@@ -29,6 +29,13 @@ namespace FightingFantasy
                 foreach (KeyValuePair<Item,int> slot in inventory)
                     s += String.Format("{0,-30} {1,-5}\n", slot.Key, slot.Value);
                 Console.WriteLine(s);
+            }
+            else if (Game.State == Game.StateEnum.Battle)
+            {
+                DisplayBattleState();
+                Console.WriteLine();
+                DisplayMessages();
+                Console.WriteLine();
             }
             PromptResponse();
         }
@@ -62,16 +69,16 @@ namespace FightingFantasy
             Console.WriteLine();
         }
 
-        static private void DisplayEnemyStats()
+        private static readonly string battle_format = "{0,8}{1,3}{2,6}{3,12}{4,3}";
+
+        static private void DisplayBattleState()
         {
-            var (name, stamina, skill) = Game.GetEnemyStats();
-            if (name.Length > 0)
-            {
-                Console.WriteLine(name);
-                Console.WriteLine($"Stamina: {stamina}");
-                Console.WriteLine($"Skill: {skill}");
-                Console.WriteLine();
-            }
+            var (protag_stamina, protag_skill, protag_luck) = Game.GetProtagStats();
+            var (enemy_name, enemy_stamina, enemy_skill) = Game.GetEnemyStats();
+            Console.WriteLine(battle_format, "You", "", "", enemy_name, "");
+            Console.WriteLine(battle_format, "Stamina:", protag_stamina, "", "Stamina:", enemy_stamina);
+            Console.WriteLine(battle_format, "Skill:", protag_skill, "vs", "Skill:", enemy_skill);
+            Console.WriteLine(battle_format, "Luck:", protag_luck, "", "", "");
         }
 
         static private void PromptResponse()

@@ -134,6 +134,7 @@ namespace FightingFantasy
         public override void Start()
         {
             battle = new Battle(protag, enemies[0]);
+            Messages.Add("Battle!");
         }
 
         public override void Continue(int input)
