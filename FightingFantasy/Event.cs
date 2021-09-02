@@ -31,7 +31,7 @@ namespace FightingFantasy
         private List<(string, int)> stat_changes;
         private List<(string, int)> items;
 
-        public StoryEvent(string story, Protagonist protag, int next_chapter, List<(string, int)> stat_changes = null, List<(string, int)> items = null)
+        public StoryEvent(string story, Protagonist protag, int next_chapter = 0, List<(string, int)> stat_changes = null, List<(string, int)> items = null)
             : base(story, protag)
         {
             NextChapter = next_chapter;
@@ -124,7 +124,7 @@ namespace FightingFantasy
             get => battle.GetChoices();
         }
 
-        public BattleEvent(string story, Protagonist protag, List<Enemy> enemies, int next_chapter)
+        public BattleEvent(string story, Protagonist protag, List<Enemy> enemies, int next_chapter = 0)
             : base(story, protag)
         {
             this.enemies = enemies;

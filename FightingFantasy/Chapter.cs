@@ -174,7 +174,7 @@ namespace FightingFantasy
         public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter)
             : base()
         {
-            events.Enqueue(new StoryEvent(story, protag, 0));
+            events.Enqueue(new StoryEvent(story, protag));
             events.Enqueue(new BattleEvent(story, protag, enemies, next_chapter));
 
             current_event = events.Dequeue();
