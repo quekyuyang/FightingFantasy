@@ -106,6 +106,8 @@ namespace FightingFantasy
         public bool Ended { get; set; }
         protected Queue<Event> events;
         protected Event current_event;
+        public Event CurrentEvent { get => current_event; }
+
         public int NextChapter
         {
             get => current_event.NextChapter;
@@ -183,11 +185,6 @@ namespace FightingFantasy
 
             current_event = events.Dequeue();
             current_event.Start();
-        }
-
-        public (string,int,int) GetEnemyStats()
-        {
-            return (current_event as BattleEvent).GetEnemyStats();
         }
     }
 

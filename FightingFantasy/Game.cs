@@ -68,7 +68,7 @@ namespace FightingFantasy
             else if (State == StateEnum.GameOver)
                 System.Environment.Exit(1);
             else
-                new Exception("Invalid game state!");
+                throw new Exception("Invalid game state!");
         }
 
         static private void GoToChapter(int chapter_n)
@@ -81,10 +81,10 @@ namespace FightingFantasy
         static public Dictionary<Item, int> GetProtagInventory() => protag.Inventory;
         static public (string,int,int) GetEnemyStats()
         {
-            if (current_chapter is BattleChapter battle_chapter)
-                return battle_chapter.GetEnemyStats();
+            if (current_chapter.CurrentEvent is BattleEvent battle_event)
+                return battle_event.GetEnemyStats();
             else
-                return ("", -1, -1);
+                throw new Exception("Attempt to get enemy stats from non-battle event");
         }
         static public List<string> GetChoices()
         {
