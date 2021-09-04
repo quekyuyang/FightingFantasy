@@ -89,7 +89,7 @@ namespace FightingFantasy
             switch (chapter_n)
             {
                 case 71:
-                    return new Chapter71(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter);
+                    return new Chapter71(chapter_data, protag);
                 case 220:
                     return new Chapter220(chapter_data, protag);
                 case 235:
@@ -190,12 +190,12 @@ namespace FightingFantasy
         }
     }
 
-    class Chapter71: BattleChapter
+    class Chapter71: Chapter
     {
-        public Chapter71(string story, Protagonist protag, List<Enemy> enemies, int next_chapter)
+        public Chapter71(ChapterData chapter_data, Protagonist protag)
         {
-            events.Enqueue(new StoryEvent(story, protag));
-            events.Enqueue(new BattleEvent71(story, protag, enemies, next_chapter));
+            events.Enqueue(new StoryEvent(chapter_data.story, protag));
+            events.Enqueue(new BattleEvent71(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter));
 
             current_event = events.Dequeue();
             current_event.Start();
