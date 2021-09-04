@@ -90,6 +90,8 @@ namespace FightingFantasy
             {
                 case 71:
                     return new Chapter71(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter);
+                case 220:
+                    return new Chapter220(chapter_data, protag);
                 case 235:
                     return new Chapter235(chapter_data, protag);
                 case 383:
@@ -194,6 +196,19 @@ namespace FightingFantasy
         {
             events.Enqueue(new StoryEvent(story, protag));
             events.Enqueue(new BattleEvent71(story, protag, enemies, next_chapter));
+
+            current_event = events.Dequeue();
+            current_event.Start();
+        }
+    }
+
+    class Chapter220: Chapter
+    {
+        public Chapter220(ChapterData chapter_data, Protagonist protag)
+        {
+            events.Enqueue(new StoryEvent(chapter_data.story, protag));
+            events.Enqueue(new BattleEvent(chapter_data.story, protag, chapter_data.enemies));
+            events.Enqueue(new ChoiceEvent(chapter_data.story2, protag, chapter_data.choices));
 
             current_event = events.Dequeue();
             current_event.Start();
