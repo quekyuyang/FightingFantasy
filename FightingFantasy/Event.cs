@@ -117,8 +117,8 @@ namespace FightingFantasy
 
     class BattleEvent : Event
     {
-        List<Enemy> enemies;
-        private Battle battle;
+        protected List<Enemy> enemies;
+        protected Battle battle;
         public override List<string> Choices
         {
             get => battle.GetChoices();
@@ -168,6 +168,19 @@ namespace FightingFantasy
         {
             Enemy enemy = enemies[0];
             return (enemy.name, enemy.stamina, enemy.skill);
+        }
+    }
+
+    class BattleEvent71: BattleEvent
+    {
+        public BattleEvent71(string story, Protagonist protag, List<Enemy> enemies, int next_chapter = 0)
+            : base(story, protag, enemies, next_chapter)
+        {}
+
+        public override void Start()
+        {
+            battle = new Battle71(protag, enemies[0]);
+            Messages.Add("Battle!");
         }
     }
 

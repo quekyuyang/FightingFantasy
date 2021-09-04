@@ -6,10 +6,10 @@ namespace FightingFantasy
 {
     class Battle
     {
-        private Protagonist protag;
-        private Enemy enemy;
+        protected Protagonist protag;
+        protected Enemy enemy;
         public string State { get; set; }
-        private bool ExpectInput { get; set; }
+        protected bool ExpectInput { get; set; }
         public string Message { get; set; }
         public bool BattleEnded { get; set; }
 
@@ -24,7 +24,7 @@ namespace FightingFantasy
             BattleEnded = false;
         }
 
-        public void RunNextRound(int choice_n)
+        public virtual void RunNextRound(int choice_n)
         {
             Message = "";
             if (!ExpectInput)
@@ -99,9 +99,44 @@ namespace FightingFantasy
                 return new List<string>();
         }
 
-        private bool EnemyDead()
+        protected bool EnemyDead()
         {
             return enemy.stamina <= 0;
+        }
+    }
+
+    class Battle71 : Battle
+    {
+        int n_rounds;
+
+        public Battle71(Protagonist protag, Enemy enemy)
+            : base(protag,enemy)
+        {
+            n_rounds = 0;
+        }
+
+        public override void RunNextRound(int choice_n)
+        {
+            Message = "";
+
+            if (protag.AttackStrength() > 15)
+                enemy.stamina -= 2;
+            else
+            {
+                n_rounds += 1;
+                Message = "Your attack misses as the tentacle drags you closer to the hole.";
+            }
+
+            if (EnemyDead())
+            {
+                Message = $"You defeated {enemy.name}! You peel the tentacle off your leg and proceed to the main entrance of the Black Tower.";
+                BattleEnded = true;
+            }
+            else if (n_rounds == 3)
+            {
+                protag.stamina = 0;
+                Message = $"The tentacle drags you into it's lair... Your adventure is over.";
+            }
         }
     }
 }

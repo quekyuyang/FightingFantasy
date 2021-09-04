@@ -88,6 +88,8 @@ namespace FightingFantasy
             var chapter_data = new ChapterData(chapters[chapter_n]);
             switch (chapter_n)
             {
+                case 71:
+                    return new Chapter71(chapter_data.story, protag, chapter_data.enemies, chapter_data.next_chapter);
                 case 235:
                     return new Chapter235(chapter_data, protag);
                 case 383:
@@ -170,7 +172,9 @@ namespace FightingFantasy
     }
 
     class BattleChapter : Chapter
-    {        
+    {
+        public BattleChapter() { }
+
         public BattleChapter(string story, Protagonist protag, List<Enemy> enemies, int next_chapter)
             : base()
         {
@@ -184,6 +188,18 @@ namespace FightingFantasy
         public (string,int,int) GetEnemyStats()
         {
             return (current_event as BattleEvent).GetEnemyStats();
+        }
+    }
+
+    class Chapter71: BattleChapter
+    {
+        public Chapter71(string story, Protagonist protag, List<Enemy> enemies, int next_chapter)
+        {
+            events.Enqueue(new StoryEvent(story, protag));
+            events.Enqueue(new BattleEvent71(story, protag, enemies, next_chapter));
+
+            current_event = events.Dequeue();
+            current_event.Start();
         }
     }
 
