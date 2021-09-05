@@ -94,6 +94,8 @@ namespace FightingFantasy
                     return new Chapter220(chapter_data, protag);
                 case 235:
                     return new Chapter235(chapter_data, protag);
+                case 300:
+                    return new Chapter300(chapter_data, protag);
                 case 383:
                     return new Chapter383(chapter_data, protag);
                 default:
@@ -222,6 +224,23 @@ namespace FightingFantasy
             events.Enqueue(new ItemEvent235(chapter_data.story, protag));
             events.Enqueue(new StoryEvent(chapter_data.story2, protag, 0, chapter_data.stat_changes, chapter_data.items));
             events.Enqueue(new ChoiceEvent("What will you do next?", protag, chapter_data.choices));
+
+            current_event = events.Dequeue();
+            current_event.Start();
+        }
+    }
+
+    class Chapter300 : Chapter
+    {
+        public Chapter300(ChapterData chapter_data, Protagonist protag)
+        {
+            int diceroll = Dice.Roll(1)[0];
+            int knife_hits = (int)Math.Ceiling((double)diceroll / 2);
+            int damage = knife_hits * 2;
+            List<(string, int)> stat_change = new List<(string,int)> { ("stamina", -damage) };
+
+            events.Enqueue(new StoryEvent($"{knife_hits} knives hit you!", protag, 0, stat_change));
+            events.Enqueue(new ChoiceEvent("You must prepare to counter-attack", protag, chapter_data.choices));
 
             current_event = events.Dequeue();
             current_event.Start();
